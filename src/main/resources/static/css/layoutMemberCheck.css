@@ -1,0 +1,68 @@
+html {
+    position : relative;
+    min-height : 100%;
+    margin : 0;
+}
+body {
+    min-height : 100%;
+}
+.footer {
+    position : absolute;
+    left : 0;
+    right : 0;
+    bottom : 0;
+    width : 100%;
+    padding : 15px 0;
+    text-align : center;
+    padding-bottom : 0px;
+}
+.content {
+    margin-bottom : 100px;
+    margin-top : 50px;
+    margin-left : 50px;
+    margin-right : 50px;
+}
+.headerNav {
+    background : linear-gradient(to top, #B0A8B9, #4B4453);
+}
+.footerNav {
+    background : linear-gradient(to bottom, #B0A8B9, #4B4453);
+}
+.btn.btn-secondary {
+    background-color: #845EC2;
+    border: #845EC2;
+}
+.btn.btn-secondary:hover {
+    background-color: #B39CD0;
+}
+.btn.btn-outline-secondary:hover {
+    background-color: #845EC2;
+}
+.btn.btn-success {
+    background-color: #4E8397;
+    border: #4E8397;
+}
+.btn.btn-success:hover {
+    background-color: #00C2A8;
+}
+.btn.btn-outline-success:hover {
+    background-color: #4E8397;
+}
+.active>.page-link {
+    background-color: #B39CD0;
+    border-color: #B39CD0;
+}
+.page-link{
+    color: #845EC2;
+}
+.page-item:not(.active)>.page-link:hover{
+    background-color: #FBEAFF;
+    border-color: #FBEAFF;
+    color: #4E4351;
+}
+.dropdown-item:active {
+    background-color: #B0A8B9;
+}
+textarea {
+    resize: none;
+}

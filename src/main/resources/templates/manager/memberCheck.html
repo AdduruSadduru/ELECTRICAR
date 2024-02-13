@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layoutMemberCheck}">
+    <head>
+        <meta name="_csrf" th:content="${_csrf.token}" />
+        <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    </head>
+    <!-- 사용자 스크립트 추가 -->
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            $(document).ready(function() {
+                $(".btn.btn-secondary").on("click", function(e) {
+                    e.preventDefault();     // 검색버튼 클릭시 form 태그 전송을 막습니다.
+                });
+            });
+
+            function changeRole(id) {
+                var token = $("meta[name='_csrf']").attr("content");
+                var header = $("meta[name='_csrf_header']").attr("content");
+
+                let checkRole = $("#checkRole_" + id).text();
+                let email = $("#email_" + id).text();
+                let role = $("#role_" + id).val();
+                let data = {
+                    "email" : email,
+                    "role" : role,
+                }
+                var param = JSON.stringify(data);
+
+                if (!role) {
+
+                } else if(checkRole != role) {
+                    let result = confirm("권한을 변경 하시겠습니까?");
+                    if (result) {
+                        $.ajax({
+                            url : "memberCheck",
+                            type : "post",
+                            contentType : "application/json",
+                            data : param,
+                            beforeSend : function(xhr) {
+                                xhr.setRequestHeader(header, token);
+                            },
+                            dataType : "json",
+                            cache : false,
+                            success : function (result, status) {
+                                alert(result);
+                            },
+                            error : function(jqXHR, status, error) {
+                                if (jqXHR.status == '401') {
+                                    alert("로그인 후 이용해 주세요.");
+                                    location.href="/members/login";
+                                } else {
+                                    alert(jqXHR.responseText);
+                                }
+                            },
+                            complete:function(data, textStatus) {
+                                location.href='/admin/memberCheck';
+                            }
+                        });
+                    }
+                }
+            }
+            function memberSearch() {
+                var searchRole = $("#searchRole").val();
+                var searchBy = $("#searchBy").val();
+                var searchQuery = $("#searchQuery").val();
+
+                location.href="/admin/memberCheck?searchRole=" + searchRole
+                 + "&searchBy=" + searchBy + "&searchQuery=" + searchQuery;
+            }
+        </script>
+    </th:block>
+    <!-- 사용자 CSS 추가 -->
+    <th:block layout:fragment="css">
+        <style>
+            select {
+                margin-right : 10px;
+            }
+        </style>
+    </th:block>
+
+    <div layout:fragment="content">
+        <div class="text-center mb-5">
+            <h1>가입된 회원 정보</h1>
+        </div>
+        <div class="container col-6" th:object="${memberSearchDto}">
+            <div class="input-group mb-2">
+                <div class="col-1 me-2">
+                    <select id="searchRole" th:value="${memberSearchDto.searchRole}" class="form-control">
+                        <option value="">전체</option>
+                        <option value="ADMIN">매니저</option>
+                        <option value="USER">유저</option>
+                    </select>
+                </div>
+                <div class="col-1 me-1">
+                    <select id="searchBy" th:value="${memberSearchDto.searchBy}" class="form-control">
+                        <option value="email">이메일</option>
+                        <option value="name">이름</option>
+                    </select>
+                </div>
+                <input id="searchQuery" th:value="${memberSearchDto.searchQuery}" type="text" class="form-control me-1" placeholder="검색어를 입력해주세요">
+                <button id="searchBtn" type="button" class="btn btn-secondary col-2" onclick="memberSearch()">검색</button>
+            </div>
+        </div>
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <td class="col col-1">이름</td>
+                    <td class="col col-2">이메일</td>
+                    <td class="col col-4">주소</td>
+                    <td class="col col-2">전화번호</td>
+                    <td class="col col-1">등록일</td>
+                    <td class="col col-2">권한</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="member, status : ${memberList}">
+                    <td th:text="${member.name}"></td>
+                    <td th:id="'email_' + ${member.id}" th:text="${member.email}"></td>
+                    <td th:text="${member.address}"></td>
+                    <td th:text="${member.tel}"></td>
+                    <td th:text="${member.createTime}"></td>
+                    <td class="text-center">
+                        <div class="input-group">
+                            <div class="col-auto me-auto">
+                                <label th:id="'checkRole_' + ${member.id}" th:text="${member.role}" class="col-form-label"></label>
+                            </div>
+                            <div class="col-auto">
+                                <select th:id="'role_' + ${member.id}" class="form-control" style="width:130px;">
+                                    <option value="">선택</option>
+                                    <option value="ADMIN">매니저</option>
+                                    <option value="USER">유저</option>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-secondary" th:value="${member.id}" th:onclick="changeRole(this.value)">수정</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+
+    </div>
+</html>

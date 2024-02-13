@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+        xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<th:block layout:fragment="css">
+
+</th:block>
+    <div th:fragment="header">
+        <nav class="navbar navbar-expand-sm p-4 navbar-dark fixed-top headerNav">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarTogglerDemo03"
+                        aria-controls="navbarTogglerDemo03"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <a class="navbar-brand" href="/">ELECTRICAR</a>
+                <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item dropdown me-2">
+                            <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                악기
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark text-end">
+                                <li>
+                                    <a href="/instruments/display?searchItemType=ELECTRIC_GUITAR&page=0"
+                                       class="dropdown-item">일렉트릭 기타</a>
+                                </li>
+                                <li>
+                                    <a href="/instruments/display?searchItemType=BASS_GUITAR&page=0"
+                                       class="dropdown-item">베이스 기타</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown me-2">
+                            <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                앰프
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark text-end">
+                                <li>
+                                    <a href="/instruments/display?searchItemType=ELECTRIC_AMP&page=0"
+                                       class="dropdown-item">기타 앰프</a>
+                                </li>
+                                <li>
+                                    <a href="/instruments/display?searchItemType=BASS_AMP&page=0"
+                                       class="dropdown-item">베이스 앰프</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/instruments/display?searchItemType=ETC&page=0"
+                               class="nav-link">악세사리</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/review/list">공지사항</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/map">찾아오시는 길</a>
+                        </li>
+                    </ul>
+
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item" sec:authorize="isAnonymous()">
+                            <a class="nav-link" href="/members/login" th:text="${memberName}"></a>
+                        </li>
+                        <li class="nav-item me-2" sec:authorize="isAnonymous()">
+                            <a class="nav-link" href="/members/new">회원 가입</a>
+                        </li>
+
+                        <li class="nav-item dropdown me-2" sec:authorize="hasAnyAuthority('ROLE_ADMIN')">
+                            <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                관리자 메뉴</button>
+                            <ul class="dropdown-menu dropdown-menu-dark text-end">
+                                <li><a class="dropdown-item" href="/admin/item/new">상품 등록</a></li>
+                                <li><a class="dropdown-item" href="/admin/items">상품 관리</a></li>
+                                <li><a class="dropdown-item" href="/admin/memberCheck">회원 정보</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown me-2" sec:authorize="isAuthenticated()">
+                            <button class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+                                    th:text="${memberName}"></button>
+                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-end">
+                                <li sec:authorize="hasAnyAuthority('ROLE_USER')"><a class="dropdown-item" href="/cart">장바구니</a></li>
+                                <li sec:authorize="hasAnyAuthority('ROLE_USER')"><a class="dropdown-item" href="/orders">구매이력</a></li>
+                                <li><a class="dropdown-item" href="/profile/myInfo">내 정보</a></li>
+                                <li><a class="dropdown-item" href="/members/logout">로그아웃</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <form class="d-flex" th:action="@{/instruments/display}" method="get">
+                        <input name="searchQuery" class="form-control me-2" type="search"
+                                placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-secondary text-light my-2 my-sm-0" type="submit">Search</button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+        <a href="/">
+            <img style="margin-top:88px" src="/images/header/header.png" class="w-100" alt="일렉트릭 기타">
+        </a>
+    </div>
+</html>

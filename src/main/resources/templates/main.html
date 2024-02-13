@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layoutMain}">
+    <head>
+        <meta name="_csrf" th:content="${_csrf.token}" />
+        <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    </head>
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            $(document).ready(function() {
+                window.addEventListener("scroll", infiniteScroll);
+            });
+
+            var loadingCheck = false;
+
+            function infiniteScroll() {
+                let page = $("#itemPageNum").val();
+                let totalPage = $("#totalPage").val();
+                let check = (window.innerHeight + window.scrollY) >= document.body.offsetHeight;
+
+                if (page < totalPage && check && !loadingCheck) {
+                    loadingCheck = true;
+                    var token = $("meta[name='_csrf']").attr("content");
+                    var header = $("meta[name='_csrf_header']").attr("content");
+
+                    let url = "/scroll?page=" + page;
+                    $.ajax({
+                        url : url,
+                        type : "get",
+                        contentType : "application/json",
+                        beforeSend : function(xhr) {
+                            xhr.setRequestHeader(header, token);
+                        },
+                        success : function (result) {
+                            let items = result.content;
+
+                            let cardList = document.getElementById("cardList");
+                            items.forEach(function(item) {
+                                const firstDiv = document.createElement("div");
+                                firstDiv.classList.add('col-md-4', 'mb-3');
+
+                                const secondDiv = document.createElement("div");
+                                secondDiv.classList.add("card");
+
+                                const aTag = document.createElement("a");
+                                aTag.setAttribute('href' , "/item/" + item.id);
+                                aTag.classList.add("btn", "btn-outline-light", "text-dark");
+
+                                const imgTag = document.createElement("img");
+                                imgTag.setAttribute("src", item.imgUrl);
+                                imgTag.classList.add("card-img-top");
+                                imgTag.setAttribute("alt", item.itemNm);
+
+                                let realPrice = ((item.price - (item.price * item.discount / 100)) / 100) * 100;
+
+                                const thirdDiv = document.createElement("div");
+                                thirdDiv.classList.add("card-body");
+
+                                const h4Tag = document.createElement("h4");
+                                h4Tag.classList.add("card-title", "item-name");
+                                const itemName = document.createTextNode(item.itemNm);
+                                h4Tag.appendChild(itemName);
+
+                                const ulTag = document.createElement("ul");
+                                ulTag.classList.add("card-title", "list-inline");
+
+                                const firstLi = document.createElement("li");
+                                firstLi.classList.add("list-inline-item");
+
+                                const firstSpan = document.createElement("span");
+                                firstSpan.classList.add("h5", "text-body-tertiary", "text-decoration-line-through");
+                                const itemPrice = document.createTextNode(priceChange(item.price) + "원");
+                                firstSpan.appendChild(itemPrice);
+
+                                const supTag = document.createElement("sup");
+                                supTag.classList.add("text-danger");
+                                const itemDiscount = document.createTextNode(item.discount + "%");
+                                supTag.appendChild(itemDiscount);
+
+                                const secondLi = document.createElement("li");
+                                secondLi.classList.add("list-inline-item");
+
+                                const secondSpan = document.createElement("span");
+                                secondSpan.classList.add("h3", "text-danger");
+                                const realPriceTextNode = document.createTextNode(priceChange(realPrice) + "원");
+                                secondSpan.appendChild(realPriceTextNode);
+
+
+                                secondLi.appendChild(secondSpan);
+                                firstLi.appendChild(firstSpan);
+                                firstLi.appendChild(supTag);
+                                ulTag.appendChild(firstLi);
+                                ulTag.appendChild(secondLi);
+                                thirdDiv.appendChild(h4Tag);
+                                thirdDiv.appendChild(ulTag);
+                                aTag.appendChild(imgTag);
+                                aTag.appendChild(thirdDiv);
+                                secondDiv.appendChild(aTag);
+                                firstDiv.appendChild(secondDiv);
+                                cardList.appendChild(firstDiv);
+                            });
+                            page++;
+                            $("#itemPageNum").val(page);
+                            loadingCheck = false;
+                        },
+                        error : function(jqXHR, status, error) {
+                            alert(jqXHR.responseText);
+                        }
+                    });
+                }
+                if (page >= totalPage) {
+                    window.removeEventListener("scroll", infiniteScroll);
+                }
+            }
+
+            function priceChange(price) {
+                let priceString = price.toString();
+                priceString = priceString.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                return priceString;
+            }
+        </script>
+    </th:block>
+    <!-- 사용자 CSS 추가 -->
+    <th:block layout:fragment="css">
+        <style>
+            a:hover {
+                text-decoration: none;
+            }
+            .btn-outline-light:hover{
+                background-color : #DCEBF1;
+            }
+            .item-name {
+                width: 100%;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                line-height: 30px;
+                height: 60px;
+            }
+        </style>
+    </th:block>
+    <div layout:fragment="content">
+
+        <h1 class="text-center mb-5">
+            이 사이트는 학습을 위한 사이트 입니다.<br>
+            저작권 및 모든 권한은
+            <a href="https://www.schoolmusic.co.kr/Shop/index.php3" style="text-decoration-line:none;" class="text-danger">'스쿨뮤직'</a>
+            에 있습니다.
+        </h1>
+
+        <div id="carousel" class="carousel slide mb-5">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#carousel" class="active" aria-current="true" data-bs-slide-to="0" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#carousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#carousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                <button type="button" data-bs-target="#carousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+                <button type="button" data-bs-target="#carousel" data-bs-slide-to="4" aria-label="Slide 5"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <a href="/instruments/display?searchItemType=ELECTRIC_GUITAR&page=0">
+                        <img src="/images/main/mainImg01.jpg" class="w-100" alt="일렉트릭 기타">
+                    </a>
+                </div>
+                <div class="carousel-item">
+                    <a href="/instruments/display?searchItemType=BASS_GUITAR&page=0">
+                        <img src="/images/main/mainImg02.jpg" class="w-100" alt="베이스 기타">
+                    </a>
+                </div>
+                <div class="carousel-item">
+                    <a href="/instruments/display?searchItemType=ELECTRIC_AMP&page=0">
+                        <img src="/images/main/mainImg03.jpg" class="w-100" alt="일렉트릭 앰프">
+                    </a>
+                </div>
+                <div class="carousel-item">
+                    <a href="/instruments/display?searchItemType=BASS_AMP&page=0">
+                        <img src="/images/main/mainImg04.jpg" class="w-100"alt="베이스 앰프">
+                    </a>
+                </div>
+                <div class="carousel-item">
+                    <a href="/instruments/display?searchItemType=ETC&page=0">
+                        <img src="/images/main/mainImg05.jpg" class="w-100"alt="악세사리">
+                    </a>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carousel" data-bs-slide="prev">
+                <span class="prev" aria-hidden="true">❮</span>
+                <span class="visually-hidden"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carousel" data-bs-slide="next">
+                <span class="prev" aria-hidden="true">❯</span>
+                <span class="visually-hidden"></span>
+            </button>
+        </div>
+
+        <div class="mt-4 mb-5">
+            <h1>현재 할인중인 상품</h1>
+        </div>
+        <input type="hidden" th:value="${items.getTotalPages}" id="totalPage">
+        <input type="hidden" id="itemPageNum" value="1">
+        <div class="row row-cols-3" id="cardList">
+            <th:block th:each="item, status: ${items.getContent()}">
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <a th:href="'/item/' + ${item.id}" class="btn btn-outline-light text-dark">
+                            <img th:src="${item.imgUrl}" class="card-img-top" th:alt="${item.itemNm}">
+                            <div class="card-body" th:with="realPrice=${(item.discount == null) ?
+                                        item.price : ((item.price - (item.price * item.discount / 100)) / 100) * 100}">
+                                <h4 class="card-title item-name">[[${item.itemNm}]]</h4>
+                                <ul class="card-title list-inline">
+                                    <li class="list-inline-item">
+                                            <span class="h5 text-body-tertiary text-decoration-line-through"
+                                                  th:text="${#numbers.formatInteger(item.price, 3, 'COMMA')} + '원'"></span>
+                                        <sup class="text-danger" th:text="${item.discount} + '%'"></sup>
+                                    </li>
+                                    <li class="list-inline-item">
+                                            <span class="h3 text-danger"
+                                                  th:text="${#numbers.formatInteger(realPrice, 3, 'COMMA')} + '원'"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+    </div>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}">
+    <!-- 사용자 스크립트 추가 -->
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            $(document).ready(function() {
+                var errorMessage = [[${errorMessage}]];
+                if (errorMessage != null) {
+                    alert(errorMessage);
+                }
+                <!-- 이 메소드 무조건 호출 -->
+                bindDomEvent();
+            });
+
+            function bindDomEvent() {
+                <!-- 이벤트 추가 "change" -->
+                <!-- 익명함수 -->
+                $(".form-control.imageFile").on("change", function() {
+                    // a.jpg
+                    <!-- 파일 이름 추출 -->
+                    <!-- 문자열이기 때문에 \\ 두개 써야함 -->
+                    var fileName = $(this).val().split("\\").pop();
+                    var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1);
+                    // 확장자 추출
+                    fileExt = fileExt.toLowerCase();	// 소문자로 전환
+
+                    if(fileExt != "jpg" && fileExt != "jpeg" && fileExt != "gif"
+                    && fileExt != "png" && fileExt != "bmp") {
+                        alert("이미지 파일만 등록이 가능합니다.");
+                        $(this).val("");
+                        return;
+                    }
+                });
+            }
+        </script>
+    </th:block>
+    <!-- 사용자 CSS 추가 -->
+    <th:block layout:fragment="css">
+        <style>
+            .input-group{
+                margin-bottom : 15px
+            }
+            .img-div {
+                margin-bottom: 10px;
+            }
+            .fieldError{
+                color: #bd2130;
+            }
+        </style>
+    </th:block>
+
+    <div layout:fragment="content">
+
+        <div class="col-6 mx-auto">
+            <form role="form" method="post" enctype="multipart/form-data" th:object="${itemFormDto}">
+                <div th:if="${#strings.isEmpty(itemFormDto.id)}">
+                    <div class="text-center mb-4">
+                        <h1>신규 상품 등록</h1>
+                    </div>
+                </div>
+                <div th:unless="${#strings.isEmpty(itemFormDto.id)}">
+                    <div class="text-center mb-4">
+                        <h1>상품 수정</h1>
+                    </div>
+                </div>
+                <input type="hidden" th:field="*{id}">
+
+                <div class="input-group w-50 mb-2">
+                    <select th:field="*{itemSellStatus}" class="form-select">
+                        <option value="SELL">판매중</option>
+                        <option value="SOLD_OUT">품절</option>
+                    </select>
+                    <select th:field="*{itemType}" class="form-select">
+                        <option value="ELECTRIC_GUITAR">일렉트릭 기타</option>
+                        <option value="BASS_GUITAR">베이스 기타</option>
+                        <option value="ELECTRIC_AMP">기타 앰프</option>
+                        <option value="BASS_AMP">베이스 앰프</option>
+                        <option value="ETC">악세사리</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text backColor">상품명</span>
+                    </div>
+                    <input type="text" th:field="*{itemNm}" class="form-control" placeholder="상품명을 입력해 주세요.">
+                </div>
+                <p th:if="${#fields.hasErrors('itemNm')}" th:errors="*{itemNm}" class="fieldError">Incorrect data</p>
+
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">가격</span>
+                    </div>
+                    <input type="number" th:field="*{price}" class="form-control w-50" placeholder="가격을 입력해 주세요.">
+                    <select th:field="*{discount}" class="form-select ms-2">
+                        <option value="">할인율</option>
+                        <option value="5">5%</option>
+                        <option value="10">10%</option>
+                        <option value="15">15%</option>
+                        <option value="20">20%</option>
+                        <option value="25">25%</option>
+                        <option value="30">30%</option>
+                        <option value="35">35%</option>
+                        <option value="40">40%</option>
+                        <option value="45">45%</option>
+                        <option value="50">50%</option>
+                    </select>
+                </div>
+                <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}" class="fieldError">Incorrect data</p>
+
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">재고</span>
+                    </div>
+                    <input type="number" th:field="*{stockNumber}" class="form-control" placeholder="상품의 재고를 입력해 주세요.">
+                </div>
+                <p th:if="${#fields.hasErrors('stockNumber')}" th:errors="*{stockNumber}" class="fieldError">Incorrect data</p>
+
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">상품 상세 내용</span>
+                    </div>
+                    <textarea class="form-control" aria-label="With textarea" th:field="*{itemDetail}"></textarea>
+                </div>
+                <p th:if="${#fields.hasErrors('itemDetail')}" th:errors="*{itemDetail}" class="fieldError">Incorrect data</p>
+
+                <!-- itemFormDto.itemImgDtoList가 비어있으면 실행 -->
+                <div th:if="${#lists.isEmpty(itemFormDto.itemImgDtoList)}">
+                    <div class="input-group" th:each="num:${#numbers.sequence(1, 11)}">
+                        <div class="input-group">
+                            <label class="image input-group-text" th:text="상품이미지 + ${num}"></label>
+                            <input type="file" class="form-control imageFile" name="itemImgFile">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- itemFormDto.itemImgDtoList가 비어있지 않으면 실행 -->
+                <div th:if="${not #lists.isEmpty(itemFormDto.itemImgDtoList)}">
+                    <div class="input-group" th:each="itemImgDto, status: ${itemFormDto.itemImgDtoList}">
+                        <div class="input-group">
+                            <!-- itemImgDto.oriImgName 오리지널 이미지 네임이 없지 않으면(있으면) ? : 3항 연산자 -->
+                            <!-- ? 참(이미지 이름) : 거짓(자기 열 상품 이미지 인덱스) -->
+                            <label class="image input-group-text"
+                                   th:text="${not #strings.isEmpty(itemImgDto.oriImgName)} ?
+                                   ${itemImgDto.oriImgName} : '상품이미지' + ${status.index + 1}"></label>
+                            <input type="file" class="form-control imageFile" name="itemImgFile">
+                            <!-- itemImgDto.id -> 히든으로 숨겨서 화면에 안나옴 -->
+                            <input type="hidden" name="itemImgIds" th:value="${itemImgDto.id}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- itemFormDto는 데이터베이스에 저장이 되어야만 아이디가 부여됨 -->
+                <!-- 문자열이 비어 있으면 실행 -> itemFormDto 아이디가 없음 : 현재 저장되어 있는 상품 이미지가 아님 -->
+                <div th:if="${#strings.isEmpty(itemFormDto.id)}" style="text-align: center">
+                    <!-- th:formaction="@{/admin/item/new}" : href mapping/admin/item/new-->
+                    <button th:formaction="@{/admin/item/new}" style="width : 100px;"
+                            type="submit" class="btn btn-secondary">저장</button>
+                </div>
+                <!-- 문자열이 비어 있지 않으면 실행 -> itemFormDto 아이디가 있음 : 현재 저장되어 있는 상품 이미지 -->
+                <div th:unless="${#strings.isEmpty(itemFormDto.id)}" style="text-align: center">
+                    <!-- th:formaction="@{/admin/item/new}" : href mapping/admin/item/3(아이디)-->
+                    <button th:formaction="@{'/admin/item/'+${itemFormDto.id}}" style="width : 100px;"
+                            type="submit" class="btn btn-secondary">수정</button>
+                </div>
+
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            </form>
+        </div>
+    </div>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}">
+    <head>
+        <meta name="_csrf" th:content="${_csrf.token}" />
+        <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    </head>
+    <!-- 사용자 스크립트 추가 -->
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            $(document).ready(function() {
+                $(".btn.btn-secondary").on("click", function(e) {
+                    e.preventDefault();
+                });
+            });
+
+            function ajaxSubmit() {
+                var token = $("meta[name='_csrf']").attr("content");
+                var header = $("meta[name='_csrf_header']").attr("content");
+
+                let title = $("#title").val();
+                let content = $("#content").val();
+                let data = {
+                    "title" : title,
+                    "content" : content
+                }
+                var param = JSON.stringify(data);
+                $.ajax({
+                    url : "write",
+                    type : "post",
+                    contentType : "application/json",
+                    data : param,
+                    beforeSend : function(xhr) {
+                        xhr.setRequestHeader(header, token);
+                    },
+                    success : function (result) {
+                        alert(result);
+                        location.href='/review/list';
+                    },
+                    error : function(jqXHR, status, error) {
+                        if (jqXHR.status == '401') {
+                            alert("로그인 후 이용해 주세요.");
+                            location.href="/members/login";
+                        } else {
+                            alert(jqXHR.responseText);
+                        }
+                    }
+                });
+            }
+        </script>
+    </th:block>
+    <!-- 사용자 CSS 추가 -->
+    <th:block layout:fragment="css">
+        <style>
+            .input-group{
+                margin-bottom : 15px
+            }
+            .img-div {
+                margin-bottom: 10px;
+            }
+            .fieldError{
+                color: #bd2130;
+            }
+        </style>
+    </th:block>
+
+    <div layout:fragment="content">
+        <div class="col-6 mx-auto">
+            <form role="form" method="post" enctype="multipart/form-data" th:object="${reviewDto}">
+                <div class="text-center mb-4">
+                    <h1>공지사항 등록</h1>
+                </div>
+                <input type="hidden" th:field="*{id}">
+
+                <div class="form-floating mb-3">
+                    <input type="text" th:field="*{title}" class="form-control" placeholder="제목을 입력해 주세요.">
+                    <label th:for="title">제목</label>
+                </div>
+
+                <div class="form-floating">
+                    <textarea class="form-control" style="height: 300px" th:field="*{content}"></textarea>
+                    <label th:for="content">내용</label>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 px-4">
+                        <p>
+                            <button type="button" class="btn btn btn-outline-secondary mt-2" onclick="ajaxSubmit()">등록</button>
+                            <button type="button" class="btn btn-secondary mt-2 float-end" onclick="location.href='/review/list'">목록</button>
+                        </p>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</html>

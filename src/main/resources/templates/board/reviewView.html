@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layouts/layout1}">
+    <head>
+        <meta name="_csrf" th:content="${_csrf.token}" />
+        <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    </head>
+    <!-- 사용자 스크립트 추가 -->
+    <th:block layout:fragment="script">
+        <script th:src="@{/js/reviewView.js}" type="text/javascript" ></script>
+    </th:block>
+    <!-- 사용자 CSS 추가 -->
+    <th:block layout:fragment="css">
+        <link th:href="@{/css/reviewView.css}" rel="stylesheet">
+    </th:block>
+
+    <div layout:fragment="content">
+        <div class="text-center mb-4">
+            <h1>공지사항</h1>
+        </div>
+        <div class="col-10 mx-auto">
+            <p class="h2 text-center" th:text="${review.title}"></p>
+
+            <div class="rounded-3 mb-2">
+                <div class="row pt-3">
+                    <div class="col text-end">
+                        <span th:text="'작성자 : ' + ${review.member.name}"></span>
+                    </div>
+                    <div class="col-2"></div>
+                    <div class="col text-start">
+                        <span th:text="'작성일 : ' + ${review.dateTime}"></span>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="contentText m-4">
+                <p th:text="${review.content}"></p>
+            </div>
+            <hr>
+            <div class="col">
+                <input id="reviewId" type="hidden" th:value="${review.id}">
+                <a href="/review/list" class="btn btn-secondary float-start mt-2 me-2 float-end">목록 보기</a>
+                <a th:href="'/review/update/'+${review.id}" sec:authorize="hasAnyAuthority('ROLE_ADMIN')"
+                   class="btn btn-success float mt-2 me-1">수정</a>
+                <a th:href="'/review/delete?reviewId=' + ${review.id}" type="button" sec:authorize="hasAnyAuthority('ROLE_ADMIN')"
+                   class="btn btn-danger float mt-2">삭제</a>
+            </div>
+            <div class="mt-5">
+                <h4>댓글</h4>
+            </div>
+            <div id="boardComment">
+                <th:block th:each="mainComment : ${mainCommentList}">
+                    <div class="commentList mb-5">
+                        <div class="mainComm" th:data-id="${mainComment.id}">
+                            <div class="position-relative mb-3">
+                                <span th:text="${mainComment.memberName}" class="mainName h5 top-50 start-0"></span>
+                                <span th:text="${mainComment.upTime}" class="mainTime position-absolute top-0 end-0"></span>
+                            </div>
+                            <div class="mainContent">
+                                <span th:text="${mainComment.content}"></span>
+                            </div>
+                            <button class="subCollBtn btn btn-outline-secondary" onclick="subCommentColl(this)">답글 등록</button>
+                            <button class="updateCollBtn btn btn-outline-success" onclick="mainUpdateColl(this)">수정 등록</button>
+                            <button class="btn btn-outline-danger float-end" onclick="commentDelete(this)">삭제</button>
+                            <div class="subCommentSaveDiv mt-3 ms-5 mb-5" style="display: none;">
+                                <textarea class="form-control" style="resize: none; width: 600px;"></textarea>
+                                <button class="btn btn-outline-secondary m-2 float-end me-5" onclick="subCommentSave(this)">답글 등록</button>
+                            </div>
+                            <div class="mainCommentUpdateDiv mt-3 ms-5 mb-5" style="display: none;">
+                                <textarea class="form-control" style="resize: none; width: 600px;"></textarea>
+                                <button class="btn btn-outline-success m-2 float-end me-5" onclick="commentUpdate(this)">수정 등록</button>
+                            </div>
+                        </div>
+                        <th:block th:each="subComment : ${subCommentList}">
+                            <div th:if="${mainComment.id == subComment.parentId}" class="row row-cols-8 mb-2">
+                                <h5 class="col-1 text-end">&#8627;</h5>
+                                <div class="subComm col-10" th:data-id="${subComment.id}">
+                                    <div class="position-relative mb-3">
+                                        <span class="subName h5 top-50 start-0" th:text="${subComment.memberName}"></span>
+                                        <span class="subTime position-absolute top-0 end-0" th:text="${subComment.upTime}"></span>
+                                    </div>
+                                    <div class="mainContent">
+                                        <span th:text="${subComment.content}"></span>
+                                    </div>
+                                    <button class="updateCollBtn btn btn-outline-success" onclick="subUpdateColl(this)">수정 등록</button>
+                                    <button class="btn btn-outline-danger float-end" onclick="commentDelete(this)">삭제</button>
+                                    <div class="subCommentUpdateDiv mt-3 ms-5 mb-5" style="display: none;">
+                                        <textarea class="form-control" style="resize: none;"></textarea>
+                                        <button class="btn btn-outline-success m-2 float-end" onclick="commentUpdate(this)">수정 등록</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </th:block>
+                    </div>
+                </th:block>
+                <div id="commentNew">
+                    <textarea class="mainCommentContent form-control" placeholder="댓글 입력"></textarea>
+                    <button class="mainSaveBtn btn btn-outline-secondary float-end mt-2" onclick="mainCommentSave()">등록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</html>

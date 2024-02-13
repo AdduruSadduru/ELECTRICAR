@@ -1,0 +1,117 @@
+html {
+    position : relative;
+    min-height : 100%;
+    margin : 0;
+}
+body {
+    min-height : 100%;
+}
+.footer {
+    position : absolute;
+    left : 0;
+    right : 0;
+    bottom : 0;
+    width : 100%;
+    padding : 15px 0;
+    text-align : center;
+    padding-bottom : 0px;
+}
+.content {
+    margin-bottom : 150px;
+    margin-top : 50px;
+    margin-left: 25%;
+    margin-right: 25%;
+}
+.rounded-3 {
+    background-color : #FEF7FF;
+    height : 3em;
+}
+.contentText {
+    margin-left : 10px;
+}
+
+#boardComment {
+    margin: 0 30px 30px 30px;
+}
+.mainComm {
+    padding: 20px;
+}
+.mainName {
+    font-weight: 600;
+}
+.mainContent {
+    margin: 10px 0 30px 20px;
+}
+.subCollBtn {
+    margin-left: 20px;
+}
+.updateCollBtn {
+    margin-start: 2px;
+}
+
+.subComm {
+    padding: 10px;
+    border-radius: 10px;
+    background-color: rgb(250, 250, 250);
+}
+.subName {
+    font-weight: 600;
+}
+.mainCommentContent {
+    resize: none;
+    height: 100px;
+}
+.headerNav {
+    background : linear-gradient(to top, #B0A8B9, #4B4453);
+}
+.footerNav {
+    background : linear-gradient(to bottom, #B0A8B9, #4B4453);
+}
+.btn.btn-secondary {
+    background-color: #845EC2;
+    border: #845EC2;
+}
+.btn.btn-secondary:hover {
+    background-color: #B39CD0;
+}
+.btn.btn-outline-secondary:hover {
+    background-color: #845EC2;
+}
+.btn.btn-success {
+    background-color: #4E8397;
+    border: #4E8397;
+}
+.btn.btn-success:hover {
+    background-color: #00C2A8;
+}
+.btn.btn-outline-success:hover {
+    background-color: #4E8397;
+}
+.btn.btn-danger {
+    background-color: #D03B29;
+    border: #D03B29;
+}
+.btn.btn-danger:hover {
+    background-color: #FF8066;
+}
+.btn.btn-outline-danger:hover {
+    background-color: #D03B29;
+}
+.active>.page-link {
+    background-color: #B39CD0;
+    border-color: #B39CD0;
+}
+.page-link{
+    color: #845EC2;
+}
+.page-item:not(.active)>.page-link:hover{
+    background-color: #FBEAFF;
+    border-color: #FBEAFF;
+    color: #4E4351;
+}
+.dropdown-item:active {
+    background-color: #B0A8B9;
+}
+textarea {
+    resize: none;
+}

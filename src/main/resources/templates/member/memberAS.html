@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}">
+
+    <!-- 사용자 CSS 추가 -->
+    <th:block layout:fragment="css">
+        <style>
+            .fieldError{
+                color : #bd2130;
+            }
+            .btn.btn-light {
+                background: #FBEAFF;
+                color: #845EC2;
+            }
+        </style>
+    </th:block>
+    <!-- 사용자 스크립트 추가 -->
+    <th:block layout:fragment="script">
+        <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+        <script th:inline="javascript">
+            $(document).ready(function() {
+                $("#detailAddress").change(function() {
+                    let check = $("#postcode").val();
+                    if (!check) {
+                        alert("주소 검색을 먼저 해 주세요");
+                        $("#detailAddress").val("");
+                    } else {
+                        addAddress();
+                    }
+                });
+            });
+            function addAddress() {
+                let postcode = $("#postcode").val();
+                let address = $("#address").val();
+                let detailAddress = $("#detailAddress").val();
+                let extraAddress = $("#extraAddress").val();
+
+                $("#allAddress").val("(" + postcode + ") " + address + ", " + detailAddress + " " +extraAddress)
+            }
+
+        </script>
+        <script>
+            function findAddress() {
+                new daum.Postcode({
+                    oncomplete: function(data) {
+                        var address = ''; // 주소 변수
+                        var extraAddress = ''; // 참고항목 변수
+
+                        if (data.userSelectedType === 'R') { // 도로명 주소
+                            address = data.roadAddress;
+                        } else { // 지번 주소
+                            address = data.jibunAddress;
+                        }
+
+                        if(data.userSelectedType === 'R'){  // 도로명 주소
+                            if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                                extraAddress += data.bname;     // 법정동명이 있을 경우
+                            }
+                            if(data.buildingName !== '' && data.apartment === 'Y'){   // 건물명이 있고, 공동주택
+                                extraAddress += (extraAddress !== '' ? ', ' + data.buildingName : data.buildingName);
+                            }
+                            if(extraAddress !== ''){        // 최종 문자열
+                                extraAddress = '(' + extraAddress + ')';
+                            }
+                            $("#extraAddress").val(extraAddress);
+                        } else {
+                            $("#extraAddress").val("");
+                        }
+                        var postcode = data.zonecode
+                        $("#postcode").val(postcode);
+                        $("#address").val(address);
+                        $("#allAddress").val("(" + postcode + ") " + address + " " + extraAddress);
+                        $("#detailAddress").val("");
+                        $("#detailAddress").focus();
+                    }
+                }).open();
+            }
+        </script>
+    </th:block>
+    <div layout:fragment="content">
+        <div class="text-center mb-4">
+            <h1>회원 정보 수정</h1>
+        </div>
+        <div class="col-6 mx-auto">
+            <form action="/profile/myInfo" role="form" method="post" th:object="${memberASDto}">
+                <div class="mb-3 row">
+                    <label th:for="email" class="col-sm-2 col-form-label">이메일 주소</label>
+                    <div class="col-sm-10">
+                        <div id="checkDiv" class="form-check">
+                            <input type="text" th:field="*{email}" class="form-control" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <label th:for="name" class="col-sm-2 col-form-label">이름</label>
+                    <div class="col-sm-10">
+                        <div class="form-check">
+                            <input type="text" th:field="*{name}" class="form-control" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <label th:for="address" class="col-sm-2 col-form-label">주소</label>
+                    <div class="col-sm-10">
+                        <div class="form-check">
+                            <input type="text" id="allAddress" th:field="*{address}"
+                                   class="form-control mb-2" placeholder="전체 주소" readonly>
+                        </div>
+                        <div class="form-check">
+                            <div class="input-group mb-2">
+                                <input class="form-control" type="text" id="postcode" placeholder="우편번호" readonly>
+                                <input class="form-control btn btn-light" type="button" onclick="findAddress()" value="주소 검색">
+                            </div>
+                        </div>
+                        <input type="hidden" id="extraAddress">
+                        <div class="form-check">
+                            <input class="form-control mb-2" type="text" id="address" placeholder="주소" readonly>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-control mb-2" type="text" id="detailAddress" placeholder="상세주소">
+                        </div>
+                        <div th:if="${#fields.hasErrors('address')}" class="form-check mt-2">
+                            <p th:errors="*{address}" class="fieldError">Incorrect date</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <label th:for="tel" class="col-sm-2 col-form-label">전화번호</label>
+                    <div class="col-sm-10">
+                        <div class="form-check">
+                            <input type="text" th:field="*{tel}" class="form-control" placeholder="전화번호를 입력해 주세요.">
+                        </div>
+                        <div th:if="${#fields.hasErrors('tel')}" class="form-check mt-2">
+                            <p th:errors="*{tel}" class="fieldError">Incorrect date</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align : center">
+                    <button type="submit" class="btn btn-secondary mt-2">Submit</button>
+                </div>
+                <!-- CSRF 방어를 위해 추가 -->
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            </form>
+        </div>
+    </div>
+</html>

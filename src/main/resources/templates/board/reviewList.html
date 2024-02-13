@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layouts/layout1}">
+    <head>
+        <meta name="_csrf" th:content="${_csrf.token}" />
+        <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    </head>
+    <!-- 사용자 스크립트 추가 -->
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            $(document).ready(function() {
+                var errorMessage = [[${errorMessage}]];
+                if (errorMessage != null) {
+                    alert(errorMessage);
+                }
+                $("#searchBtn").on("click", function(e) {
+                    e.preventDefault();     // 검색버튼 클릭시 form 태그 전송을 막습니다.
+                    page(0);
+                });
+            });
+
+            function page(page) {
+                var searchDateType = $("#searchDateType").val();
+                var searchBy = $("#searchBy").val();
+                var searchQuery = $("#searchQuery").val();
+
+                location.href="/review/list" + page + "?searchDateType=" + searchDateType
+                 + "&searchBy=" + searchBy + "&searchQuery=" + searchQuery;
+            }
+
+            function pageChange(page) {
+                location.href = "/review/list/" + page;
+            }
+        </script>
+    </th:block>
+    <th:block layout:fragment="css">
+        <style>
+            select {
+                margin-right : 10px;
+            }
+        </style>
+    </th:block>
+
+    <div layout:fragment="content">
+        <div class="text-center mb-4">
+            <h1>공지사항</h1>
+        </div>
+        <div class="col-8 mx-auto">
+            <form th:action="@{'/review/list/' + ${reviewPage.number}}" role="form" method="get" th:object="${reviewPage}">
+
+                <div class="col">
+                    <a href="/review/write" sec:authorize="hasAnyAuthority('ROLE_ADMIN')"
+                       class="btn btn-secondary float-end mt-2">글쓰기</a>
+                </div>
+
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <td class="col col-1">no</td>
+                        <td class="col col-5">제목</td>
+                        <td class="col col-2">틍록일</td>
+                        <th class="col col-1">글쓴이</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="review, status : ${reviewPage.getContent()}">
+                        <td th:text="${review.id}"></td>
+                        <td>
+                            <a th:href="'/review/view/'+${review.id}" th:text="${review.title}"
+                               class="link-body-emphasis link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover"></a>
+                        </td>
+                        <td th:text="${review.dateTime}"></td>
+                        <td th:text="${review.member.name}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div th:with="start=${(reviewPage.number/maxPage)*maxPage + 1}, end=(${(reviewPage.totalPages==0) ?
+                             1 : (start + (maxPage-1) < reviewPage.totalPages ? start + (maxPage -1) : reviewPage.totalPages)})" >
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${reviewPage.first}?'disabled'">
+                            <a th:onclick="'javascript:page(' + ${reviewPage.number - 1} + ')'" aria-label="Previous" class="page-link">
+                                <span aria-hidden="true">Previous</span>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="page: ${#numbers.sequence(start, end)}" th:classappend="${reviewPage.number eq page-1} ? 'active' : ''">
+                            <a th:onclick="'javascript:page(' + ${page -1} + ')'" th:inline="text" class="page-link">[[${page}]]</a>
+                        </li>
+                        <li class="page-item" th:classappend="${reviewPage.last}?'disabled'">
+                            <a th:onclick="'javascript:page(' + ${reviewPage.number + 1} + ')'" aria-label="Next" class="page-link">
+                                <span area-hidden="true">Next</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="container col-7" th:object="${reviewSearchDto}">
+                    <div class="input-group">
+                        <select th:field="*{searchDateType}" class="form-control">
+                            <option value="all">전체기간</option>
+                            <option value="1d">1일</option>
+                            <option value="1w">1주</option>
+                            <option value="1m">1개월</option>
+                            <option value="6m">6개월</option>
+                        </select>
+                        <select th:field="*{searchBy}" class="form-control">
+                            <option value="title">제목</option>
+                            <option value="content">내용</option>
+                            <option value="createdBy">작성자</option>
+                        </select>
+                        <input th:field="*{searchQuery}" type="text" class="form-control" placeholder="검색어를 입력해주세요">
+                        <button id="searchBtn" type="submit" class="btn btn-secondary">검색</button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</html>
